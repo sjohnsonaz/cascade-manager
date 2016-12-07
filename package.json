@@ -1,0 +1,60 @@
+{
+  "name": "cascade-manager",
+  "version": "0.0.0",
+  "description": "Seamless front-end state and data management",
+  "author": "Sean Johnson <sjohnson@sjohnsonaz.com>",
+  "contributors": [],
+  "license": "MIT",
+  "main": "dist/scripts/modules/CascadeManager.js",
+  "typings": "dist/scripts/modules/CascadeManager.d.ts",
+  "scripts": {
+    "install": "",
+    "build": "tsc",
+    "prepublish": "tsc --declaration",
+    "test": "node src/mocha/NodeRunner.js",
+    "browser": "webpack --config webpack.config.js",
+    "dev": "webpack --config webpack.dev.config.js --watch",
+    "dev-local": "tsc --declaration --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sjohnsonaz/cascade-manager.git"
+  },
+  "bugs": {},
+  "dependencies": {},
+  "peerDependencies": {
+    "cascade": "0.0.6"
+  },
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.33",
+    "cascade": "0.0.6",
+    "chai": "^3.5.0",
+    "es6-shim": "^0.35.1",
+    "jsdom": "^9.8.3",
+    "mocha": "^3.1.2",
+    "reflect-metadata": "^0.1.8",
+    "ts-loader": "^0.9.5",
+    "typescript": "^2.1.1",
+    "webpack": "^1.13.2"
+  },
+  "keywords": [
+    "cascade",
+    "observable",
+    "computed",
+    "observablearray",
+    "reactive",
+    "model",
+    "view",
+    "viewmodel",
+    "mvvm",
+    "mvc",
+    "datasource",
+    "manager",
+    "connection",
+    "store",
+    "ajax",
+    "react",
+    "knockout"
+  ]
+}

@@ -1,0 +1,17 @@
+node_modules/
+docs/
+src/
+dist/bundle/
+dist/tests/
+dist/mocha/
+*.map
+*.log
+*.tgz
+cascade-manager*
+.gitignore
+.npmignore
+tsconfig.json
+typings.json
+webpack.config.js
+webpack.dev.config.js
+.travis.yml
