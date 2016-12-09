@@ -2,7 +2,7 @@ var webpack = require('webpack');
 
 module.exports = {
     entry: {
-        'cascadeManager': ['./src/scripts/modules/CascadeManager.ts'],
+        'cascadeManager': ['./src/scripts/CascadeManager.ts'],
         'mochaRunner': './src/mocha/BrowserRunner.ts'
     },
     output: {

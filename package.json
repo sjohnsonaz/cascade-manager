@@ -27,16 +27,19 @@
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
+    "@types/core-js": "^0.9.35",
     "@types/mocha": "^2.2.33",
+    "@types/whatwg-fetch": "0.0.32",
     "cascade": "0.0.6",
     "chai": "^3.5.0",
-    "es6-shim": "^0.35.1",
+    "core-js": "^2.4.1",
     "jsdom": "^9.8.3",
     "mocha": "^3.1.2",
     "reflect-metadata": "^0.1.8",
     "ts-loader": "^0.9.5",
-    "typescript": "^2.1.1",
-    "webpack": "^1.13.2"
+    "typescript": "^2.1.4",
+    "webpack": "^1.13.2",
+    "whatwg-fetch": "^2.0.1"
   },
   "keywords": [
     "cascade",

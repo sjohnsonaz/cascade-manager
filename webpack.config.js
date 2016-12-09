@@ -2,7 +2,7 @@ var webpack = require('webpack');
 
 module.exports = {
     entry: {
-        'cascadeManager': ['./src/scripts/modules/CascadeManager.ts']
+        'cascadeManager': ['./src/scripts/CascadeManager.ts']
     },
     output: {
         filename: './dist/bundle/[name].min.js',
