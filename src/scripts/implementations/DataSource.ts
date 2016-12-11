@@ -128,33 +128,32 @@ export default class DataSource<T> {
             };
     }
 
-    static enableSelectAll(dataSource: DataSource<any>, selectionProperty: string, selectAllProperty: string, arrayProperty: string) {
-        selectionProperty = selectionProperty || 'selected';
-        selectAllProperty = selectAllProperty || 'selectAll';
-        arrayProperty = arrayProperty || 'activeRows';
+    static enableSelectAll<T>(dataSource: DataSource<T>, selectionProperty: string = 'selected', selectAllProperty: string = 'selectAll', arrayProperty: string = 'activeRows') {
         Cascade.createComputed(dataSource, selectAllProperty, function() {
-            if (dataSource[arrayProperty]().length) {
-                var item = ko.utils.arrayFirst(dataSource[arrayProperty](), function(item) {
-                    return !item[selectionProperty]();
+            var array: T[] = dataSource[arrayProperty];
+            if (array && array.length) {
+                var item = array.find(function(item) {
+                    return !item[selectionProperty];
                 });
-                return item == null;
+                return !item;
             } else {
                 return false;
             }
         }, false, function(value: boolean) {
-            ko.utils.arrayForEach(dataSource[arrayProperty](), function(item) {
-                item[selectionProperty](value);
-            });
+            var array: T[] = dataSource[arrayProperty];
+            if (array) {
+                array.forEach(function(item) {
+                    item[selectionProperty] = value;
+                });
+            }
         });
     }
-    static enableArraySelection(dataSource, selectionProperty, dataArray, selectionStorageProperty) {
-        selectionStorageProperty = selectionStorageProperty || 'selected'
-        dataSource[selectionStorageProperty] = new Computed(function() {
-            var data = ko.unwrap(dataArray);
+    static enableArraySelection<T>(dataSource: DataSource<T>, selectionProperty: string, dataArray: T[], selectionStorageProperty = 'selected') {
+        Cascade.createComputed(dataSource, selectionStorageProperty, function() {
             var selected = [];
-            if (data) {
-                for (var index = 0, length = data.length; index < length; index++) {
-                    var item = data[index];
+            if (dataArray) {
+                for (var index = 0, length = dataArray.length; index < length; index++) {
+                    var item = dataArray[index];
                     if (item[selectionProperty]()) {
                         selected.push(item);
                     }
@@ -168,7 +167,7 @@ export default class DataSource<T> {
             for (var index = 0, length = selected.length; index < length; index++) {
                 selected[index][selectionProperty](false);
             }
-        };
+        }
         if (dataSource.clearSelection) {
             var oldFunction = dataSource.clearSelection;
             dataSource.clearSelection = function() {
@@ -179,66 +178,56 @@ export default class DataSource<T> {
             dataSource.clearSelection = clearSelection;
         }
     }
-    static enablePagedSelection(dataSource, selectionProperty, uniqueProperty, selectionStorageProperty) {
-        selectionStorageProperty = selectionStorageProperty || 'selected'
+    static enablePagedSelection<T>(dataSource: DataSource<T>, selectionProperty: string, uniqueProperty: string, selectionStorageProperty: string = 'selected') {
         var allselected = {};
         var lockSelection = false;
-        dataSource.activeRows.subscribe(function(value) {
+        Cascade.subscribe(dataSource, 'activeRows', function(value: T[]) {
             lockSelection = true;
-            var base = uniqueProperty ? 0 : (dataSource.page.peek() * dataSource.pageSize.peek());
-            ko.utils.arrayForEach(value, function(item, index) {
-                var id = uniqueProperty ? ko.unwrap(item[uniqueProperty]) : base + index;
-                if (allselected[id]) {
-                    // Store new item
-                    allselected[id] = item;
-                    item[selectionProperty](true);
-                }
-            });
+            var base = uniqueProperty ? 0 : (Cascade.peek(dataSource, 'page') * Cascade.peek(dataSource, 'pageSize'));
+            if (value) {
+                value.forEach(function(item, index) {
+                    var id = uniqueProperty ? item[uniqueProperty] : base + index;
+                    if (allselected[id]) {
+                        // Store new item
+                        allselected[id] = item;
+                        item[selectionProperty](true);
+                    }
+                });
+            }
             lockSelection = false;
         });
         var forceSelectionChange = new Observable<boolean>(false);
-        dataSource[selectionStorageProperty] = new Computed(function(value) {
-            lockSelection = true;
-            allselected = {};
-            ko.utils.arrayForEach(value, function(item, index) {
-                var id = ko.unwrap(item[uniqueProperty]);
-                // Ensure the item is selected
-                item[selectionProperty](true);
-                allselected[id] = item;
-            });
-            lockSelection = false;
-            forceSelectionChange.setValue(true);
-        }, false, undefined, function() {
+        dataSource[selectionStorageProperty] = new Computed<T[]>(function(n: T[]) {
             var ignorePage = forceSelectionChange.getValue();
             forceSelectionChange.setValue(false);
             // Loop through current page
-            var activeRows = dataSource.activeRows();
+            var activeRows = dataSource.activeRows;
             if (activeRows.length) {
                 if (!lockSelection) {
-                    var base = uniqueProperty ? 0 : (dataSource.page.peek() * dataSource.pageSize.peek());
-                    ko.utils.arrayForEach(activeRows, function(item, index) {
-                        var id = uniqueProperty ? ko.unwrap(item[uniqueProperty]) : base + index;
+                    var base = uniqueProperty ? 0 : (Cascade.peek(dataSource, 'page') * Cascade.peek(dataSource, 'pageSize'));
+                    activeRows.forEach(function(item, index) {
+                        var id = uniqueProperty ? item[uniqueProperty] : base + index;
                         if (!ignorePage) {
-                            if (item[selectionProperty]()) {
+                            if (item[selectionProperty]) {
                                 allselected[id] = item;
                             } else {
                                 delete allselected[id];
                             }
                         } else {
                             if (allselected[id]) {
-                                item[selectionProperty](true);
+                                item[selectionProperty] = true;
                             } else {
-                                item[selectionProperty](false);
+                                item[selectionProperty] = false;
                             }
                             // subscribe
-                            item[selectionProperty]();
+                            item[selectionProperty];
                         }
                     });
                 }
             }
 
             // Build selected array, remove any deselected.
-            var selected = [];
+            var selected: T[] = [];
             for (var x in allselected) {
                 if (allselected.hasOwnProperty(x)) {
                     var item = allselected[x];
@@ -250,9 +239,22 @@ export default class DataSource<T> {
                 }
             }
             return selected;
+        }, false, undefined, function(value) {
+            lockSelection = true;
+            allselected = {};
+            if (value) {
+                value.forEach(function(item, index) {
+                    var id = item[uniqueProperty];
+                    // Ensure the item is selected
+                    item[selectionProperty](true);
+                    allselected[id] = item;
+                });
+            }
+            lockSelection = false;
+            forceSelectionChange.setValue(true);
         });
         function clearSelection() {
-            var selected = dataSource.selected();
+            var selected = dataSource.selected;
             for (var index = 0, length = selected.length; index < length; index++) {
                 selected[index][selectionProperty](false);
             }
