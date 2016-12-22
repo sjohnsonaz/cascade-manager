@@ -30,3 +30,4 @@ node_modules
 dist/
 *.tgz
 cascade-manager*
+.vscode/
