@@ -3,3 +3,4 @@
 import 'reflect-metadata';
 
 import '../tests/requiredTest0';
+import '../tests/DataSourceTest0';
