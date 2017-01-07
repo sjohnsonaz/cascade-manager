@@ -3,7 +3,12 @@ var path = require('path');
 
 var Mocha = require('mocha');
 
+var chai = require('chai');
+var chaiAsPromised = require('chai-as-promised');
+
 var DomIntegration = require('./DomIntegration');
+
+chai.use(chaiAsPromised);
 
 // Instantiate a Mocha instance.
 var mocha = new Mocha();
