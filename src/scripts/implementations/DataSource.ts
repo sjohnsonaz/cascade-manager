@@ -1,24 +1,8 @@
 import { observable } from 'cascade';
 
-export type RefreshCallback<T> = (page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => Promise<IPage<T>>;
+import { IDataSource, IDataSourceParams, IPage, RefreshCallback } from '../interfaces/IDataSource';
 
-export interface IPage<T> {
-    data: T[];
-    count: number;
-}
-
-export interface IDataSourceParams<T> {
-    pageSize?: number;
-    page?: number;
-    pagerSize?: number;
-    sortedColumn?: string;
-    sortedDirection?: boolean;
-    activeRows?: T[];
-    rowCount?: number;
-    error?: boolean;
-}
-
-export default class DataSource<T> {
+export default class DataSource<T> implements IDataSource<T> {
     @observable pageSize: number;
     @observable page: number;
     @observable pagerSize: number;
@@ -32,15 +16,16 @@ export default class DataSource<T> {
     lockRefresh: any
     private runCount: number;
 
-    @observable get dataComputed(): boolean {
+    @observable get dataComputed(): Promise<IPage<T>> {
         var pageSize = this.pageSize;
         var page = this.page;
         var sortedColumn = this.sortedColumn;
         var sortedDirection = this.sortedDirection;
         if (!this.lockRefresh) {
-            this.run(true);
+            return this.run(true);
+        } else {
+            return (Promise.reject('DataSource is locked') as any);
         }
-        return true;
     }
 
     constructor(source?: RefreshCallback<T>, params?: IDataSourceParams<T>) {
@@ -60,12 +45,12 @@ export default class DataSource<T> {
         this.runCount = 0;
     }
 
-    init() {
+    init(): Promise<IPage<T>> {
         this.lockRefresh = false;
         return this.dataComputed;
     }
 
-    run(preservePage) {
+    run(preservePage?: boolean): Promise<IPage<T>> {
         this.runCount++;
         var runID = this.runCount;
         this.lockRefresh = false;
@@ -74,7 +59,7 @@ export default class DataSource<T> {
         var sortedColumn = this.sortedColumn;
         var sortedDirection = this.sortedDirection;
         var promise = this.source(page, pageSize, sortedColumn, sortedDirection);
-        promise.then((results) => {
+        return promise.then((results) => {
             if (runID == this.runCount) {
                 this.activeRows = results.data;
                 this.rowCount = results.count;
@@ -83,6 +68,7 @@ export default class DataSource<T> {
                 }
                 this.error = false;
             }
+            return results;
         }).catch(() => {
             if (runID == this.runCount) {
                 this.error = true;
