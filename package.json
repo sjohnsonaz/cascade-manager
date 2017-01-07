@@ -5,8 +5,8 @@
   "author": "Sean Johnson <sjohnson@sjohnsonaz.com>",
   "contributors": [],
   "license": "MIT",
-  "main": "dist/scripts/modules/CascadeManager.js",
-  "typings": "dist/scripts/modules/CascadeManager.d.ts",
+  "main": "dist/scripts/CascadeManager.js",
+  "typings": "dist/scripts/CascadeManager.d.ts",
   "scripts": {
     "install": "",
     "build": "tsc",
