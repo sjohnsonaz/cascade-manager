@@ -16,4 +16,3 @@ export { default as CrudConnection } from './implementations/CrudConnection';
 export { default as Model } from './implementations/Model';
 export { default as QueryModel } from './implementations/QueryModel';
 export { default as Store } from './implementations/Store';
-export { default as DataSource } from './implementations/DataSource';

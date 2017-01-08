@@ -6,6 +6,8 @@ var Mocha = require('mocha');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 
+require('isomorphic-fetch');
+
 var DomIntegration = require('./DomIntegration');
 
 chai.use(chaiAsPromised);

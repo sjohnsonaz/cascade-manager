@@ -1,8 +1,9 @@
+import { IDataSource, IPage } from 'cascade-datasource';
+
 import { IState } from './IState';
 import { IStore } from './IStore';
 import { IData } from './IData';
 import { IModel } from './IModel';
-import { IDataSource, IPage } from './IDataSource';
 import { IListQuery } from './IListQuery';
 
 export enum Operation {

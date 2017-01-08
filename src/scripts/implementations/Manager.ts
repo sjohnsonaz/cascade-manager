@@ -1,13 +1,12 @@
 import { observable } from 'cascade';
+import DataSource, { IDataSource, IPage } from 'cascade-datasource';
 
 import { IStore } from '../interfaces/IStore';
 import { IData } from '../interfaces/IData';
 import { IModel } from '../interfaces/IModel';
-import { IDataSource, IPage } from '../interfaces/IDataSource';
 import { IListQuery } from '../interfaces/IListQuery';
 import { IManager, Operation } from '../interfaces/IManager';
 
-import DataSource from './DataSource';
 import { State } from './State';
 
 export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>, W extends IStore<T, any, U, V, X>, X extends IListQuery> extends State implements IManager<T, U, V, W, X> {
