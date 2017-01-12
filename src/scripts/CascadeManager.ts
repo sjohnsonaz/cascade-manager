@@ -19,4 +19,4 @@ export { default as Manager } from './implementations/Manager';
 export { default as Model } from './implementations/Model';
 export { default as QueryModel } from './implementations/QueryModel';
 export { default as Store } from './implementations/Store';
-export { State } from './implementations/State';
+export { default as State } from './implementations/State';
