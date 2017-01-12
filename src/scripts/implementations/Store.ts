@@ -1,11 +1,12 @@
-﻿import {observable} from 'cascade';
+﻿import { observable } from 'cascade';
+import { IPage } from 'cascade-datasource';
 
-import {ICrudConnection} from '../interfaces/ICrudConnection';
-import {IListQuery} from '../interfaces/IListQuery';
-import {IModel} from '../interfaces/IModel';
-import {IQueryModel} from '../interfaces/IQueryModel';
-import {IData, IDataNumberDictionary, IDataStringDictionary} from '../interfaces/IData';
-import {IStore} from '../interfaces/IStore';
+import { ICrudConnection } from '../interfaces/ICrudConnection';
+import { IListQuery } from '../interfaces/IListQuery';
+import { IModel } from '../interfaces/IModel';
+import { IQueryModel } from '../interfaces/IQueryModel';
+import { IData, IDataNumberDictionary, IDataStringDictionary } from '../interfaces/IData';
+import { IStore } from '../interfaces/IStore';
 
 export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IData<T>, W extends IModel<T, any, U>, X extends IListQuery> implements IStore<T, U, V, W, X> {
     connection: U;
@@ -28,10 +29,7 @@ export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IDat
         return this.connection.list(query).then((data) => {
             this.listLoading = false;
             this.listLoaded = true;
-            return Promise.resolve({
-                data: data.DataList,
-                count: data.TotalCount
-            });
+            return Promise.resolve(this.listToPage(data));
         }).catch((data) => {
             this.listLoading = false;
             this.listLoaded = false;
@@ -76,6 +74,10 @@ export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IDat
             this.deleteLoaded = false;
             return Promise.reject(data);
         });
+    }
+
+    listToPage(listData: any): IPage<V> {
+        return listData;
     }
 
     static objectArrayToQueryModelArray<T, U extends IQueryModel<T>>(data: Array<T>, model: new (data?: T) => U): Array<U> {
