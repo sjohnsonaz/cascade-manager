@@ -47,7 +47,14 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
     constructor(store: W) {
         super();
         this.store = store;
-        this.dataSource = new DataSource<U>();
+        this.dataSource = new DataSource<U>((page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => {
+            return this.store.list(Manager.buildQuery(page, pageSize)).then((result) => {
+                return Promise.resolve({
+                    data: result.data,
+                    count: result.count
+                });
+            });
+        });
     }
 
     init(id?: T, query?: X, defaultItem?: X) {
@@ -237,5 +244,12 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
                     });
             }
         })();
+    }
+
+    static buildQuery<T>(page: number, pageSize: number) {
+        return Object.assign({
+            offset: Math.abs(page * pageSize),
+            limit: pageSize >= 1 ? pageSize : undefined
+        });
     }
 }
