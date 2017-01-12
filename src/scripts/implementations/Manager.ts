@@ -7,7 +7,7 @@ import { IModel } from '../interfaces/IModel';
 import { IListQuery } from '../interfaces/IListQuery';
 import { IManager, Operation } from '../interfaces/IManager';
 
-import { State } from './State';
+import State from './State';
 
 export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>, W extends IStore<T, any, U, V, X>, X extends IListQuery> extends State implements IManager<T, U, V, W, X> {
     //U extends IStore<any, any, any, V, W>, V extends IModel<any, any, any>, W extends IListQuery> extends State implements IManager<U, V, W> {
