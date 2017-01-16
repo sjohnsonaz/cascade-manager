@@ -23,8 +23,10 @@
   },
   "bugs": {},
   "dependencies": {
-    "cascade": "^0.0.13",
     "cascade-datasource": "^0.0.0"
+  },
+  "peerDependencies": {
+    "cascade": "^0.0.13"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
