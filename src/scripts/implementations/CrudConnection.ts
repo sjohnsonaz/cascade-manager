@@ -1,16 +1,16 @@
-﻿import {IData} from '../interfaces/IData';
-import {IListQuery} from '../interfaces/IListQuery';
-import {IListResult} from '../interfaces/IListResult';
-import {ICrudConnection} from '../interfaces/ICrudConnection';
+﻿import { IData } from '../interfaces/IData';
+import { IListQuery } from '../interfaces/IListQuery';
+import { IListResult } from '../interfaces/IListResult';
+import { ICrudConnection } from '../interfaces/ICrudConnection';
 import Connection from './Connection';
 
 export default class CrudConnection<T, U extends IData<T>, V extends IListQuery> extends Connection implements ICrudConnection<T, U, V> {
-    list(query: V) {
+    list(query?: V) {
         return this.call<IListResult<U>>(this.base + Connection.objectToQueryString(query || {}), {});
     }
 
     get(id: T) {
-        return this.call<U>(this.base + id, {});
+        return this.call<U>(Connection.join(this.base, id), {});
     }
 
     post(data: U) {
@@ -36,7 +36,7 @@ export default class CrudConnection<T, U extends IData<T>, V extends IListQuery>
     }
 
     delete(id: T) {
-        return this.call<boolean>(this.base + id, {
+        return this.call<boolean>(Connection.join(this.base, id), {
             method: 'DELETE'
         });
     }
