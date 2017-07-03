@@ -23,29 +23,27 @@
   },
   "bugs": {},
   "dependencies": {
-    "cascade-datasource": "^0.0.0"
+    "cascade-datasource": "^0.0.1"
   },
   "peerDependencies": {
-    "cascade": "^0.0.13"
+    "cascade": "^0.0.24"
   },
   "devDependencies": {
-    "@types/chai": "^3.4.34",
-    "@types/chai-as-promised": "0.0.29",
-    "@types/core-js": "^0.9.35",
-    "@types/mocha": "^2.2.33",
-    "@types/whatwg-fetch": "0.0.32",
-    "cascade": "^0.0.13",
-    "chai": "^3.5.0",
-    "chai-as-promised": "^6.0.0",
-    "core-js": "^2.4.1",
-    "isomorphic-fetch": "^2.2.1",
-    "jsdom": "^9.8.3",
-    "mocha": "^3.1.2",
-    "reflect-metadata": "^0.1.8",
-    "ts-loader": "^0.9.5",
-    "typescript": "^2.1.4",
-    "webpack": "^1.13.2",
-    "whatwg-fetch": "^2.0.1"
+    "@types/chai": "4.0.1",
+    "@types/chai-as-promised": "0.0.31",
+    "@types/mocha": "2.2.41",
+    "cascade": "^0.0.24",
+    "chai": "4.0.2",
+    "chai-as-promised": "6.0.0",
+    "core-js": "2.4.1",
+    "isomorphic-fetch": "2.2.1",
+    "jsdom": "11.1.0",
+    "mocha": "3.4.2",
+    "reflect-metadata": "0.1.10",
+    "ts-loader": "2.2.2",
+    "typescript": "2.4.1",
+    "webpack": "3.0.0",
+    "whatwg-fetch": "2.0.3"
   },
   "keywords": [
     "cascade",

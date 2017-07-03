@@ -16,7 +16,11 @@
     "suppressImplicitAnyIndexErrors": true,
     "outDir": "dist",
     "sourceMap": true,
-    "reactNamespace": "Cascade"
+    "reactNamespace": "Cascade",
+    "lib": [
+      "dom",
+      "es2015"
+    ]
   },
   "exclude": [
     "cascade-manager*",
@@ -24,8 +28,5 @@
     "node_modules"
   ],
   "compileOnSave": true,
-  "buildOnSave": false,
-  "atom": {
-    "rewriteTsconfig": false
-  }
+  "buildOnSave": false
 }
