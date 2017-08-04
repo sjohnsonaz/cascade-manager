@@ -1,6 +1,3 @@
-import 'whatwg-fetch';
-import 'core-js';
-
 export { IConnection } from './interfaces/IConnection';
 export { ICrudConnection } from './interfaces/ICrudConnection';
 export { IData } from './interfaces/IData';

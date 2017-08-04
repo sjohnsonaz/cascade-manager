@@ -19,6 +19,7 @@
     "reactNamespace": "Cascade",
     "lib": [
       "dom",
+      "es6",
       "es2015"
     ]
   },

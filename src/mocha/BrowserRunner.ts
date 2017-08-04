@@ -5,6 +5,8 @@ import chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 
+import 'whatwg-fetch';
+import 'core-js';
 import 'reflect-metadata';
 
 import '../tests/requiredTest0';

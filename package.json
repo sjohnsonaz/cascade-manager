@@ -8,10 +8,9 @@
   "main": "dist/scripts/CascadeManager.js",
   "typings": "dist/scripts/CascadeManager.d.ts",
   "scripts": {
-    "install": "",
     "build": "tsc",
-    "prepublish": "tsc --declaration",
-    "test": "node src/mocha/NodeRunner.js",
+    "prepublishOnly": "tsc --declaration",
+    "test": "tsc && node src/mocha/NodeRunner.js",
     "min": "webpack --config webpack.config.js --progress",
     "dev": "webpack --config webpack.dev.config.js --progress",
     "watch": "webpack --config webpack.dev.config.js --progress --watch",
