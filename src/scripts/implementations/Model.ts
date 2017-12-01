@@ -11,7 +11,7 @@ export default class Model<T, U extends IData<T>, V extends ICrudConnection<T, U
     @observable saving: boolean;
     @observable deleting: boolean;
     @observable selected;
-    get $id(): T {
+    @observable get $id(): T {
         return this[this.primaryKey];
     }
     set $id(value: T) {
