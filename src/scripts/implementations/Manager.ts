@@ -47,13 +47,12 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
     constructor(store: W) {
         super();
         this.store = store;
-        this.dataSource = new DataSource<U>((page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => {
-            return this.store.list(Manager.buildQuery(page, pageSize)).then((result) => {
-                return Promise.resolve({
-                    data: result.data,
-                    count: result.count
-                });
-            });
+        this.dataSource = new DataSource<U>(async (page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => {
+            let result = await this.store.list(Manager.buildQuery(page, pageSize));
+            return {
+                data: result.data,
+                count: result.count
+            };
         });
     }
 
@@ -140,45 +139,49 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
         return this.item;
     }
 
-    view(id: T) {
+    async view(id: T) {
         this.clearOperation();
         this.loadCount++;
         var loadCount = this.loadCount;
         this.loadingId = id;
-        return this.store.get(id).then((item) => {
+        try {
+            let item = await this.store.get(id);
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
                 this.item = item;
                 // TODO: should this be set?
                 // this.operation = Operation.Edit;
             }
-            return Promise.resolve(item);
-        }).catch((data) => {
+            return item;
+        }
+        catch (error) {
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
             }
-            return Promise.reject(data);
-        });
+            throw error;
+        }
     }
 
-    edit(id: T) {
+    async edit(id: T) {
         this.clearOperation();
         this.loadCount++;
         var loadCount = this.loadCount;
         this.loadingId = id;
-        return this.store.get(id).then((item) => {
+        try {
+            let item = await this.store.get(id);
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
                 this.item = item;
                 this.operation = Operation.Edit;
             }
-            return Promise.resolve(item);
-        }).catch((data) => {
+            return item;
+        }
+        catch (error) {
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
             }
-            return Promise.reject(data);
-        });
+            throw error;
+        }
     }
 
     delete(id: T) {
@@ -213,37 +216,32 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
         }
     }
 
-    confirm(saveAndContinue: boolean = false) {
-        return (() => {
-            switch (this.operation) {
-                case Operation.Create:
-                    return this.item.save().then((data) => {
-                        if (!saveAndContinue) {
-                            this.operation = Operation.Get;
-                            this.item = undefined;
-                        }
-                        this.dataSource.run();
-                        return Promise.resolve(data);
-                    });
-                case Operation.Edit:
-                    return this.item.save().then((data) => {
-                        if (!saveAndContinue) {
-                            this.operation = Operation.Get;
-                            this.item = undefined;
-                        }
-                        this.dataSource.run();
-                        return Promise.resolve(data);
-                    });
-                case Operation.Delete:
-                    return this.store.delete(this.idToDelete).then((data) => {
-                        this.operation = Operation.Get;
-                        this.item = undefined;
-                        this.idToDelete = undefined;
-                        this.dataSource.run();
-                        return Promise.resolve(data);
-                    });
-            }
-        })();
+    async confirm(saveAndContinue: boolean = false) {
+        switch (this.operation) {
+            case Operation.Create:
+                let saveData = await this.item.save();
+                if (!saveAndContinue) {
+                    this.operation = Operation.Get;
+                    this.item = undefined;
+                }
+                this.dataSource.run();
+                return saveData;
+            case Operation.Edit:
+                let editData = await this.item.save();
+                if (!saveAndContinue) {
+                    this.operation = Operation.Get;
+                    this.item = undefined;
+                }
+                this.dataSource.run();
+                return editData;
+            case Operation.Delete:
+                let deleteData = await this.store.delete(this.idToDelete);
+                this.operation = Operation.Get;
+                this.item = undefined;
+                this.idToDelete = undefined;
+                this.dataSource.run();
+                return deleteData;
+        }
     }
 
     static buildQuery<T>(page: number, pageSize: number) {
