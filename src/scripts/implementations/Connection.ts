@@ -18,7 +18,7 @@ export default class Connection implements IConnection {
         init = this.beforeCall(url, init, false);
         let response = await fetch(url, init);
         let data = await response.json();
-        if (response.status < 200 && response.status >= 300) {
+        if (response.status < 200 || response.status >= 300) {
             throw data;
         }
         return data;
@@ -28,7 +28,7 @@ export default class Connection implements IConnection {
         init = this.beforeCall(url, init, true);
         let response = await fetch(url, init);
         let data = await response.text();
-        if (response.status < 200 && response.status >= 300) {
+        if (response.status < 200 || response.status >= 300) {
             throw data;
         }
         return data;
