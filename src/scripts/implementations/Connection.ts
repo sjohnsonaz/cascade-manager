@@ -14,51 +14,24 @@ export default class Connection implements IConnection {
         }
     }
 
-    status(response: Response): Promise<Response> {
-        if (response.status >= 200 && response.status < 300) {
-            return Promise.resolve(response);
-        } else {
-            //return Promise.reject(new Error(response.statusText));
-            return Promise.reject<Response>(response);
-        }
-    }
-
-    json<T>(response: Response): Promise<T> {
-        return response.json();
-    }
-
-    jsonError(response: Response): Promise<any> {
-        return response.json().then((data: any) => {
-            return Promise.reject(data);
-        });
-    }
-
-    noParse(response: Response): Promise<string> {
-        return response.text().then((data: string) => {
-            return Promise.resolve(data);
-        });
-    }
-
-    noParseError(response: Response): Promise<string> {
-        return response.text().then((data: string) => {
-            return Promise.reject<string>(data);
-        });
-    }
-
-    call<T>(url: string | Request, init?: RequestInit): Promise<T> {
+    async call<T>(url: string | Request, init?: RequestInit): Promise<T> {
         init = this.beforeCall(url, init, false);
-        return fetch(url, init)
-            .then(this.status)
-            .then<T>(this.json)
-            .catch(this.jsonError);
+        let response = await fetch(url, init);
+        let data = await response.json();
+        if (response.status < 200 && response.status >= 300) {
+            throw data;
+        }
+        return data;
     }
 
-    callText(url: string | Request, init?: RequestInit): Promise<string> {
+    async callText(url: string | Request, init?: RequestInit): Promise<string> {
         init = this.beforeCall(url, init, true);
-        return fetch(url, init)
-            .then(this.status)
-            .then<any>(this.noParse)
-            .catch(this.noParseError);
+        let response = await fetch(url, init);
+        let data = await response.text();
+        if (response.status < 200 && response.status >= 300) {
+            throw data;
+        }
+        return data;
     }
 
     beforeCall(url: string | Request, init: RequestInit, noParse: boolean): RequestInit {
