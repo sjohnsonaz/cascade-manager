@@ -27,13 +27,13 @@
     "cascade-datasource": "^0.0.1"
   },
   "peerDependencies": {
-    "cascade": "^0.1.8"
+    "cascade": "^0.1.9"
   },
   "devDependencies": {
     "@types/chai": "4.1.1",
     "@types/chai-as-promised": "7.1.0",
     "@types/mocha": "2.2.46",
-    "cascade": "0.1.8",
+    "cascade": "0.1.9",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
     "isomorphic-fetch": "2.2.1",
