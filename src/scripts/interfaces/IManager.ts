@@ -28,7 +28,6 @@ export interface IManager<T, U extends IData<T>, V extends IModel<T, U, any>, W 
     slideIndex: number;
 
     init(id?: T, query?: X, defaultItem?: X): Promise<IPage<U>>;
-    initFromHistory(pageChange?: boolean, create?: boolean, id?: T, query?: X, defaultItem?: X): Promise<IPage<U>>;
     refresh(): Promise<IPage<U>>;
     clear(): any;
     dispose(): any;

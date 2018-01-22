@@ -69,24 +69,6 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
         return output;
     }
 
-    initFromHistory(pageChange?: boolean, create: boolean = false, id?: T, query?: X, defaultItem?: X): Promise<IPage<U>> {
-        if (pageChange) {
-            var output = this.init(id, query, defaultItem);
-            if (!id && create) {
-                this.create();
-            }
-        } else {
-            if (id) {
-                this.edit(id);
-            } else if (create) {
-                this.create();
-            } else {
-                this.cancel();
-            }
-        }
-        return output;
-    }
-
     refresh() {
         return this.dataSource.run(false);
     }
