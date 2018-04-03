@@ -1,7 +1,7 @@
 export { IConnection } from './interfaces/IConnection';
 export { ICrudConnection } from './interfaces/ICrudConnection';
 export { IData } from './interfaces/IData';
-export { IListQuery } from './interfaces/IListQuery';
+export { IListQuery, IQuery, IQueryPartial } from './interfaces/IListQuery';
 export { IListResult } from './interfaces/IListResult';
 export { IManager } from './interfaces/IManager';
 export { IModel } from './interfaces/IModel';
@@ -16,4 +16,4 @@ export { default as Manager } from './implementations/Manager';
 export { default as Model } from './implementations/Model';
 export { default as QueryModel } from './implementations/QueryModel';
 export { default as Store } from './implementations/Store';
-export { default as State } from './implementations/State';
+export { State } from './implementations/State';

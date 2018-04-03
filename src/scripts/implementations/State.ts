@@ -2,16 +2,12 @@ import { observable } from 'cascade';
 
 import { IState } from '../interfaces/IState';
 
-export default class State implements IState {
-    title: string | JSX.Element;
+import BaseEventTarget from './BaseEventTarget';
+export abstract class State extends BaseEventTarget implements IState {
     showCommands: boolean;
     @observable active = false;
-    init() {
-        this.active = false;
-    }
-    dispose() {
-
-    }
+    abstract init(): void;
+    abstract dispose(): void;
     open() {
         this.active = true;
     }

@@ -1,14 +1,11 @@
 import { IConnection } from '../interfaces/IConnection';
-
 import urlJoin from '../util/UrlJoin';
 
 export default class Connection implements IConnection {
     base: string;
-    init: RequestInit;
 
-    constructor(base: string, route?: string, init?: RequestInit) {
+    constructor(base: string, route?: string) {
         this.base = base;
-        this.init = init;
         if (route) {
             this.base += route;
         }
@@ -18,12 +15,11 @@ export default class Connection implements IConnection {
         if (response.status >= 200 && response.status < 300) {
             return Promise.resolve(response);
         } else {
-            //return Promise.reject(new Error(response.statusText));
             return Promise.reject<Response>(response);
         }
     }
 
-    json<T>(response: Response): Promise<T> {
+    json<V>(response: Response): Promise<V> {
         return response.json();
     }
 
@@ -33,32 +29,31 @@ export default class Connection implements IConnection {
         });
     }
 
-    noParse(response: Response): Promise<string> {
+    noParse(response: Response): Promise<any> {
         return response.text().then((data: string) => {
             return Promise.resolve(data);
         });
     }
 
-    noParseError(response: Response): Promise<string> {
+    noParseError(response: Response): Promise<any> {
         return response.text().then((data: string) => {
-            return Promise.reject<string>(data);
+            return Promise.reject(data);
         });
     }
 
-    call<T>(url: string | Request, init?: RequestInit): Promise<T> {
-        init = this.beforeCall(url, init, false);
-        return fetch(url, init)
-            .then(this.status)
-            .then<T>(this.json)
-            .catch(this.jsonError);
-    }
-
-    callText(url: string | Request, init?: RequestInit): Promise<string> {
-        init = this.beforeCall(url, init, true);
-        return fetch(url, init)
-            .then(this.status)
-            .then<any>(this.noParse)
-            .catch(this.noParseError);
+    call<T>(url: string | Request, init?: RequestInit, noParse: boolean = false): Promise<T> {
+        init = this.beforeCall(url, init, noParse);
+        if (noParse) {
+            return fetch(url, init)
+                .then(this.status)
+                .then<any>(this.noParse)
+                .catch(this.noParseError);
+        } else {
+            return fetch(url, init)
+                .then(this.status)
+                .then<T>(this.json)
+                .catch(this.jsonError);
+        }
     }
 
     beforeCall(url: string | Request, init: RequestInit, noParse: boolean): RequestInit {

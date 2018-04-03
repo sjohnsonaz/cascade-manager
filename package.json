@@ -25,24 +25,24 @@
     "cascade-datasource": "^0.0.1"
   },
   "peerDependencies": {
-    "cascade": "^0.0.24"
+    "cascade": "^0.1.14"
   },
   "devDependencies": {
-    "@types/chai": "4.0.1",
-    "@types/chai-as-promised": "0.0.31",
-    "@types/mocha": "2.2.41",
-    "cascade": "^0.0.24",
-    "chai": "4.0.2",
-    "chai-as-promised": "6.0.0",
+    "@types/chai": "4.1.2",
+    "@types/chai-as-promised": "7.1.0",
+    "@types/mocha": "5.0.0",
+    "cascade": "^0.1.14",
+    "chai": "4.1.2",
+    "chai-as-promised": "7.1.1",
     "core-js": "2.4.1",
     "isomorphic-fetch": "2.2.1",
-    "jsdom": "11.1.0",
-    "mocha": "3.4.2",
-    "reflect-metadata": "0.1.10",
-    "ts-loader": "2.2.2",
-    "typescript": "2.4.1",
-    "webpack": "3.0.0",
-    "whatwg-fetch": "2.0.3"
+    "jsdom": "11.7.0",
+    "mocha": "5.0.5",
+    "reflect-metadata": "0.1.12",
+    "ts-loader": "4.1.0",
+    "typescript": "2.8.1",
+    "webpack": "4.4.1",
+    "webpack-cli": "2.0.13"
   },
   "keywords": [
     "cascade",

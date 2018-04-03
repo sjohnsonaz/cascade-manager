@@ -4,12 +4,12 @@ import DataSource, { IDataSource, IPage } from 'cascade-datasource';
 import { IStore } from '../interfaces/IStore';
 import { IData } from '../interfaces/IData';
 import { IModel } from '../interfaces/IModel';
-import { IListQuery } from '../interfaces/IListQuery';
+import { IQuery } from '../interfaces/IListQuery';
 import { IManager, Operation } from '../interfaces/IManager';
 
-import State from './State';
+import { State } from './State';
 
-export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>, W extends IStore<T, any, U, V, X>, X extends IListQuery> extends State implements IManager<T, U, V, W, X> {
+export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>, W extends IStore<T, any, U, V, X>, X extends IQuery<U> = IQuery<U>> extends State implements IManager<T, U, V, W, X> {
     //U extends IStore<any, any, any, V, W>, V extends IModel<any, any, any>, W extends IListQuery> extends State implements IManager<U, V, W> {
     store: W;
     @observable item: V;
@@ -57,7 +57,7 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
         });
     }
 
-    init(id?: T, query?: X, defaultItem?: X) {
+    init(id?: T, query?: X, defaultItem?: X): Promise<IPage<U>> {
         this.defaultItem = defaultItem;
         //this.active = false;
         var output = this.dataSource.init();
@@ -70,25 +70,7 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
         return output;
     }
 
-    initFromHistory(pageChange?: boolean, create: boolean = false, id?: T, query?: X, defaultItem?: X): Promise<IPage<U>> {
-        if (pageChange) {
-            var output = this.init(id, query, defaultItem);
-            if (!id && create) {
-                this.create();
-            }
-        } else {
-            if (id) {
-                this.edit(id);
-            } else if (create) {
-                this.create();
-            } else {
-                this.cancel();
-            }
-        }
-        return output;
-    }
-
-    refresh() {
+    refresh(): Promise<IPage<U>> {
         return this.dataSource.run(false);
     }
 
@@ -127,7 +109,10 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
         this.loadingId = undefined;
         this.operation = Operation.Create;
         // TODO: Clean this any.
-        this.item = this.store.create(data || this.defaultItem as any);
+        let item = this.store.create(data || this.defaultItem as any);
+        this.item = item;
+        this.sendEvent('create', item);
+
         return this.item;
     }
 
@@ -136,49 +121,55 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
         this.loadCount++;
         this.loadingId = undefined;
         // TODO: Clean this any.
-        this.item = this.store.create(data || this.defaultItem as any);
+        let item = this.store.create(data || this.defaultItem as any);
+        this.item = item;
+        this.sendEvent('viewPreload', this.item);
         return this.item;
     }
 
-    view(id: T) {
+    async view(id: T): Promise<V> {
         this.clearOperation();
         this.loadCount++;
         var loadCount = this.loadCount;
         this.loadingId = id;
-        return this.store.get(id).then((item) => {
+        try {
+            let item = await this.store.get(id);
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
                 this.item = item;
                 // TODO: should this be set?
                 // this.operation = Operation.Edit;
             }
-            return Promise.resolve(item);
-        }).catch((data) => {
+            this.sendEvent('view', item);
+            return item;
+        } catch (error) {
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
             }
-            return Promise.reject(data);
-        });
+            throw error;
+        }
     }
 
-    edit(id: T) {
+    async edit(id: T): Promise<V> {
         this.clearOperation();
         this.loadCount++;
         var loadCount = this.loadCount;
         this.loadingId = id;
-        return this.store.get(id).then((item) => {
+        try {
+            let item = await this.store.get(id);
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
                 this.item = item;
                 this.operation = Operation.Edit;
+                this.sendEvent('edit', item);
             }
-            return Promise.resolve(item);
-        }).catch((data) => {
+            return item;
+        } catch (error) {
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
             }
-            return Promise.reject(data);
-        });
+            throw error;
+        }
     }
 
     delete(id: T) {
@@ -211,39 +202,40 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
             default:
                 break;
         }
+        this.sendEvent('cancel');
     }
 
-    confirm(saveAndContinue: boolean = false) {
-        return (() => {
-            switch (this.operation) {
-                case Operation.Create:
-                    return this.item.save().then((data) => {
-                        if (!saveAndContinue) {
-                            this.operation = Operation.Get;
-                            this.item = undefined;
-                        }
-                        this.dataSource.run();
-                        return Promise.resolve(data);
-                    });
-                case Operation.Edit:
-                    return this.item.save().then((data) => {
-                        if (!saveAndContinue) {
-                            this.operation = Operation.Get;
-                            this.item = undefined;
-                        }
-                        this.dataSource.run();
-                        return Promise.resolve(data);
-                    });
-                case Operation.Delete:
-                    return this.store.delete(this.idToDelete).then((data) => {
-                        this.operation = Operation.Get;
-                        this.item = undefined;
-                        this.idToDelete = undefined;
-                        this.dataSource.run();
-                        return Promise.resolve(data);
-                    });
-            }
-        })();
+    async confirm(saveAndContinue: boolean = false): Promise<T | boolean> {
+        switch (this.operation) {
+            case Operation.Create:
+                let createData = await this.item.save();
+                this.sendEvent('created', this.item);
+                if (!saveAndContinue) {
+                    this.operation = Operation.Get;
+                    this.item = undefined;
+                }
+                this.dataSource.run();
+                return createData;
+            case Operation.Edit:
+                let editData = await this.item.save();
+                this.sendEvent(typeof editData === 'boolean' ? 'updated' : 'created', this.item);
+                if (!saveAndContinue) {
+                    this.operation = Operation.Get;
+                    this.item = undefined;
+                }
+                this.dataSource.run();
+                return editData;
+            case Operation.Delete:
+                let deleteData = await this.store.delete(this.idToDelete);
+                this.sendEvent('deleted', this.idToDelete);
+                this.operation = Operation.Get;
+                this.item = undefined;
+                this.idToDelete = undefined;
+                this.dataSource.run();
+                return deleteData;
+            default:
+                return undefined;
+        }
     }
 
     static buildQuery<T>(page: number, pageSize: number) {

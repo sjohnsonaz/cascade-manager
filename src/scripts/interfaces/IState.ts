@@ -1,9 +1,8 @@
-export interface IState {
-    title: any;
+export interface IState extends EventTarget {
     showCommands: boolean;
-    init();
-    dispose();
+    init(): void;
+    dispose(): void;
     active: boolean;
-    open();
-    close();
+    open(): void;
+    close(): void;
 }
