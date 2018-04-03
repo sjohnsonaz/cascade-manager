@@ -1,18 +1,38 @@
 import { expect } from 'chai';
 import Cascade, { observable } from 'cascade';
 
-import { CrudConnection, Store } from '../scripts/CascadeManager';
+import { CrudConnection, Store, IStore, IModel, ICrudConnection } from '../scripts/CascadeManager';
 
 describe('Store', () => {
-    it('should Get from the server', () => {
-        var connection = new CrudConnection('https://jsonplaceholder.typicode.com/posts/');
-        var store = new Store(connection);
+    interface ISimpleData {
+        Id: string;
+        userId: number;
+    }
+
+    interface ISimpleDataConnection extends ICrudConnection<string, ISimpleData> {
+
+    }
+
+    interface ISimpleDataModel extends IModel<string, ISimpleData, ISimpleDataConnection> {
+        Id: string;
+        userId: number;
+    }
+
+    interface ISimpleDataStore extends IStore<ISimpleDataConnection, ISimpleDataModel> {
+
+    }
+    it('should Get from the server', async () => {
+        var connection: ISimpleDataConnection = new CrudConnection('https://jsonplaceholder.typicode.com/posts/');
+        var store: ISimpleDataStore = new Store(connection);
         store.listToPage = (data) => {
             return {
                 data: data,
                 count: data.length
             };
         };
-        return expect(store.list({ userId: 1 })).to.eventually.have.property('count');
+        let result = await store.list({
+            userId: 1
+        });
+        return expect(result).to.have.property('count');
     });
 });

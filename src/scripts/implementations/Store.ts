@@ -2,15 +2,15 @@
 import { IPage } from 'cascade-datasource';
 
 import { ICrudConnection } from '../interfaces/ICrudConnection';
-import { IListQuery } from '../interfaces/IListQuery';
+import { IQuery } from '../interfaces/IListQuery';
 import { IModel } from '../interfaces/IModel';
 import { IQueryModel } from '../interfaces/IQueryModel';
 import { IData, IDataNumberDictionary, IDataStringDictionary } from '../interfaces/IData';
 import { IStore } from '../interfaces/IStore';
 
-export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IData<T>, W extends IModel<T, any, U>, X extends IListQuery> implements IStore<T, U, V, W, X> {
+export default class Store<U extends ICrudConnection<W['$id'], any, X>, W extends IModel<any, any, U>, X extends IQuery<W['baseData']> = IQuery<W['baseData']>> implements IStore<U, W, X> {
     connection: U;
-    modelConstructor: new (data?: V, connection?: U) => W;
+    modelConstructor: new (data?: W['baseData'], connection?: U) => W;
     @observable listLoading: boolean = false;
     @observable listLoaded: boolean = false;
     @observable getLoading: boolean = false;
@@ -18,7 +18,7 @@ export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IDat
     @observable deleteLoading: boolean = false;
     @observable deleteLoaded: boolean = false;
 
-    constructor(connection: U, modelConstructor?: new (data?: V, connection?: U) => W) {
+    constructor(connection: U, modelConstructor?: new (data?: W['baseData'], connection?: U) => W) {
         this.connection = connection;
         this.modelConstructor = modelConstructor;
     }
@@ -36,7 +36,7 @@ export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IDat
         }
     }
 
-    async get(id: T) {
+    async get(id: W['$id']) {
         this.getLoading = true;
         this.getLoaded = false;
         try {
@@ -49,11 +49,11 @@ export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IDat
         }
     }
 
-    create(data?: V) {
+    create(data?: W['baseData']) {
         return new this.modelConstructor(data, this.connection);
     }
 
-    createArray(data?: V[]) {
+    createArray(data?: W['baseData'][]) {
         var output: W[] = [];
         for (var index = 0, length = data.length; index < length; index++) {
             output.push(this.create(data[index]));
@@ -62,7 +62,7 @@ export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IDat
     }
 
     // TODO: Add bulk delete
-    async delete(id: T) {
+    async delete(id: W['$id']) {
         this.deleteLoading = true;
         this.deleteLoaded = false;
         try {
@@ -75,7 +75,7 @@ export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IDat
         }
     }
 
-    listToPage(listData: any): IPage<V> {
+    listToPage(listData: any): IPage<W['baseData']> {
         return listData;
     }
 

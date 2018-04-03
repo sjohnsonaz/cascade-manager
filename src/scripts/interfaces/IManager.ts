@@ -13,32 +13,32 @@ export enum Operation {
     Delete
 }
 
-export interface IManager<T, U extends IData<T>, V extends IModel<T, U, any>, W extends IStore<T, any, U, V, X>, X extends IQuery<U> = IQuery<U>> extends IState {
-    item: V;
-    idToDelete: T;
+export interface IManager<W extends IStore<any, any, X>, X extends IQuery<InstanceType<W['modelConstructor']>> = IQuery<InstanceType<W['modelConstructor']>>> extends IState {
+    item: InstanceType<W['modelConstructor']>;
+    idToDelete: InstanceType<W['modelConstructor']>['$id'];
     operation: Operation;
     store: W;
-    dataSource: IDataSource<U>;
+    dataSource: IDataSource<InstanceType<W['modelConstructor']>['baseData']>;
     defaultItem: X;
     loadCount: number;
-    loadingId: T;
+    loadingId: InstanceType<W['modelConstructor']>['$id'];
 
     // TODO: Fix this
     //selectedItems: U[];
     slideIndex: number;
 
-    init(id?: T, query?: X, defaultItem?: X): Promise<IPage<U>>;
-    refresh(): Promise<IPage<U>>;
+    init(id?: InstanceType<W['modelConstructor']>['$id'], query?: X, defaultItem?: X): Promise<IPage<InstanceType<W['modelConstructor']>['baseData']>>;
+    refresh(): Promise<IPage<InstanceType<W['modelConstructor']>['baseData']>>;
     clear(): void;
     dispose(): void;
     // TODO: Fix this
     //clearSelection(): void;
     clearOperation(): void;
-    create(data?: U): V;
-    viewPreload(data?: U): V;
-    view(id: T): Promise<V>;
-    edit(id: T): Promise<V>;
-    delete(id: T): void;
+    create(data?: InstanceType<W['modelConstructor']>['baseData']): InstanceType<W['modelConstructor']>;
+    viewPreload(data?: InstanceType<W['modelConstructor']>['baseData']): InstanceType<W['modelConstructor']>;
+    view(id: InstanceType<W['modelConstructor']>['$id']): Promise<InstanceType<W['modelConstructor']>>;
+    edit(id: InstanceType<W['modelConstructor']>['$id']): Promise<InstanceType<W['modelConstructor']>>;
+    delete(id: InstanceType<W['modelConstructor']>['$id']): void;
     cancel(): void;
-    confirm(saveAndContinue?: boolean): Promise<T | boolean>;
+    confirm(saveAndContinue?: boolean): Promise<InstanceType<W['modelConstructor']> | boolean>;
 }
