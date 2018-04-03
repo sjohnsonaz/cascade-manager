@@ -23,32 +23,30 @@ export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IDat
         this.modelConstructor = modelConstructor;
     }
 
-    list(query?: X) {
+    async list(query?: X) {
         this.listLoading = true;
         this.listLoaded = false;
-        return this.connection.list(query).then((data) => {
-            this.listLoading = false;
+        try {
+            let data = await this.connection.list(query);
             this.listLoaded = true;
-            return Promise.resolve(this.listToPage(data));
-        }).catch((data) => {
+            return this.listToPage(data);
+        }
+        finally {
             this.listLoading = false;
-            this.listLoaded = false;
-            return Promise.reject(data);
-        });
+        }
     }
 
-    get(id: T) {
+    async get(id: T) {
         this.getLoading = true;
         this.getLoaded = false;
-        return this.connection.get(id).then((data) => {
-            this.getLoading = false;
+        try {
+            let data = await this.connection.get(id);
             this.getLoaded = true;
-            return Promise.resolve(Store.objectToModel(data, this.modelConstructor, this.connection));
-        }).catch((data) => {
+            return Store.objectToModel(data, this.modelConstructor, this.connection);
+        }
+        finally {
             this.getLoading = false;
-            this.getLoaded = false;
-            return Promise.reject(data);
-        });
+        }
     }
 
     create(data?: V) {
@@ -64,16 +62,17 @@ export default class Store<T, U extends ICrudConnection<T, V, X>, V extends IDat
     }
 
     // TODO: Add bulk delete
-    delete(id: T) {
-        return this.connection.delete(id).then((data) => {
-            this.deleteLoading = false;
+    async delete(id: T) {
+        this.deleteLoading = true;
+        this.deleteLoaded = false;
+        try {
+            let data = await this.connection.delete(id);
             this.deleteLoaded = true;
-            return Promise.resolve(data);
-        }).catch((data) => {
+            return data;
+        }
+        finally {
             this.deleteLoading = false;
-            this.deleteLoaded = false;
-            return Promise.reject(data);
-        });
+        }
     }
 
     listToPage(listData: any): IPage<V> {

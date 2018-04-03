@@ -3,8 +3,10 @@ import Cascade, { observable } from 'cascade';
 
 import { Manager, Store, CrudConnection } from '../scripts/CascadeManager';
 
+import { wait } from '../scripts/util/PromiseUtil';
+
 describe('Manager', () => {
-    it('should List from the server', (done) => {
+    it('should List from the server', async () => {
         var connection = new CrudConnection('https://jsonplaceholder.typicode.com/posts/');
         var store = new Store(connection);
         store.listToPage = (data) => {
@@ -14,11 +16,8 @@ describe('Manager', () => {
             };
         };
         var manager = new Manager(store);
-        manager.init().then((data) => {
-            window.setTimeout(() => {
-                expect(manager.dataSource.activeRows.length).to.be.greaterThan(0);
-                done();
-            }, 1);
-        });
+        let data = await manager.init();
+        await wait(1);
+        expect(manager.dataSource.activeRows.length).to.be.greaterThan(0);
     });
 });

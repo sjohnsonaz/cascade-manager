@@ -47,13 +47,12 @@ export default class Manager<T, U extends IData<T>, V extends IModel<T, U, any>,
     constructor(store: W) {
         super();
         this.store = store;
-        this.dataSource = new DataSource<U>((page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => {
-            return this.store.list(Manager.buildQuery(page, pageSize)).then((result) => {
-                return Promise.resolve({
-                    data: result.data,
-                    count: result.count
-                });
-            });
+        this.dataSource = new DataSource<U>(async (page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => {
+            let result = await this.store.list(Manager.buildQuery(page, pageSize));
+            return {
+                data: result.data,
+                count: result.count
+            };
         });
     }
 

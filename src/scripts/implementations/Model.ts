@@ -1,8 +1,8 @@
-﻿import {observable} from 'cascade';
+﻿import { observable } from 'cascade';
 
-import {IData} from '../interfaces/IData';
-import {ICrudConnection} from '../interfaces/ICrudConnection';
-import {IModel, ModelNumberIndex, ModelStringIndex} from '../interfaces/IModel';
+import { IData } from '../interfaces/IData';
+import { ICrudConnection } from '../interfaces/ICrudConnection';
+import { IModel, ModelNumberIndex, ModelStringIndex } from '../interfaces/IModel';
 import QueryModel from './QueryModel';
 
 export default class Model<T, U extends IData<T>, V extends ICrudConnection<T, U, any>> extends QueryModel<U> implements IModel<T, U, V> {
@@ -36,41 +36,33 @@ export default class Model<T, U extends IData<T>, V extends ICrudConnection<T, U
         return output;
     }
 
-    save(): Promise<T | boolean> {
+    async save(): Promise<T | boolean> {
         this.saving = true;
-        if (this.$id) {
-            return this.connection.put(this.unwrap()).then((data) => {
-                this.saving = false;
-                return Promise.resolve(data);
-            }).catch((data) => {
-                this.saving = false;
-                return Promise.reject(data);
-            });
-        } else {
-            return this.connection.post(this.unwrap()).then((data) => {
+        try {
+            if (this.$id) {
+                return await this.connection.put(this.unwrap());
+            } else {
+                let data = await this.connection.post(this.unwrap());
                 this.$id = data;
-                this.saving = false;
-                return Promise.resolve(data);
-            }).catch((data) => {
-                this.saving = false;
-                return Promise.reject(data);
-            });
+                return data;
+            }
+        }
+        finally {
+            this.saving = false;
         }
     }
 
-    delete(): Promise<boolean> {
+    async delete(): Promise<boolean> {
         var id = this.$id;
-        if (id) {
-            this.deleting = true;
-            return this.connection.delete(id).then((data) => {
-                this.deleting = false;
-                return Promise.resolve(data);
-            }).catch((data) => {
-                this.deleting = false;
-                return Promise.reject(data);
-            });
-        } else {
+        if (!id) {
             throw new Error('Model does not have an primary key.');
+        }
+        this.deleting = true;
+        try {
+            return await this.connection.delete(id);
+        }
+        finally {
+            this.deleting = false;
         }
     }
 
@@ -105,4 +97,4 @@ export default class Model<T, U extends IData<T>, V extends ICrudConnection<T, U
     }
 }
 
-export {ModelNumberIndex, ModelStringIndex}
+export { ModelNumberIndex, ModelStringIndex }
