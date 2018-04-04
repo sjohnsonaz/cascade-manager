@@ -40,11 +40,11 @@ export default class Model<T, U extends IData<T>, V extends ICrudConnection<T, U
         this.saving = true;
         try {
             if (this.$id) {
-                return await this.connection.put(this.unwrap());
+                return await this.connection.put(this.$id, this.unwrap());
             } else {
-                let data = await this.connection.post(this.unwrap());
-                this.$id = data;
-                return data;
+                let id = await this.connection.post(this.unwrap());
+                this.$id = id;
+                return id;
             }
         }
         finally {

@@ -7,6 +7,6 @@ export interface ICrudConnection<T, U extends IData<T>, V extends IQuery<U> = IQ
     list(query: V): Promise<IListResult<U>>;
     get(id: T): Promise<U>;
     post(data: U): Promise<T>;
-    put(data: U): Promise<boolean>;
+    put(id: T, data: U): Promise<boolean>;
     delete(id: T): Promise<boolean>;
 }

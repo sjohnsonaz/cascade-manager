@@ -162,7 +162,8 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
                 this.sendEvent('edit', item);
             }
             return item;
-        } catch (error) {
+        }
+        catch (error) {
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
             }

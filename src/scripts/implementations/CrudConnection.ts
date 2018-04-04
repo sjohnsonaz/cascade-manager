@@ -25,8 +25,8 @@ export default class CrudConnection<T, U extends IData<T>, V extends IQuery<U> =
         });
     }
 
-    put(data: U): Promise<boolean> {
-        return this.call<boolean>(this.base, {
+    put(id: T, data: U): Promise<boolean> {
+        return this.call<boolean>(Connection.join(this.base, id), {
             method: 'PUT',
             body: JSON.stringify(data),
             headers: {
