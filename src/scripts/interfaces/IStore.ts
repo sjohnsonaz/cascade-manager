@@ -3,7 +3,6 @@
 import { ICrudConnection } from './ICrudConnection';
 import { IQuery } from './IListQuery';
 import { IModel } from './IModel';
-import { IData } from './IData';
 
 export interface IStore<U extends ICrudConnection<W['$id'], any, X>, W extends IModel<any, any, U>, X extends IQuery<W['baseData']> = IQuery<W['baseData']>> {
     connection: U;

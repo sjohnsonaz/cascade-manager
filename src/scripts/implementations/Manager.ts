@@ -2,23 +2,21 @@ import { observable } from 'cascade';
 import DataSource, { IDataSource, IPage } from 'cascade-datasource';
 
 import { IStore } from '../interfaces/IStore';
-import { IData } from '../interfaces/IData';
-import { IModel } from '../interfaces/IModel';
 import { IQuery } from '../interfaces/IListQuery';
-import { IManager, Operation } from '../interfaces/IManager';
+import { IManager, Operation, ModelFromStore, IdFromStore, BaseDataFromStore } from '../interfaces/IManager';
 
 import { State } from './State';
 
-export default class Manager<W extends IStore<any, any, X>, X extends IQuery<InstanceType<W['modelConstructor']>> = IQuery<InstanceType<W['modelConstructor']>>> extends State implements IManager<W, X> {
+export default class Manager<W extends IStore<any, any, X>, X extends IQuery<ModelFromStore<W>> = IQuery<ModelFromStore<W>>> extends State implements IManager<W, X> {
     store: W;
-    @observable item: InstanceType<W['modelConstructor']>;
-    @observable idToDelete: InstanceType<W['modelConstructor']>['$id'];
+    @observable item: ModelFromStore<W>;
+    @observable idToDelete: IdFromStore<W>;
     @observable operation: Operation = Operation.Get;
-    dataSource: IDataSource<InstanceType<W['modelConstructor']>['baseData']>;
+    dataSource: IDataSource<BaseDataFromStore<W>>;
     defaultItem: X;
     initialized: boolean = false;
     loadCount: number = 0;
-    @observable loadingId: InstanceType<W['modelConstructor']>['$id'];
+    @observable loadingId: IdFromStore<W>;
 
     // TODO: Fix this.
     /*
@@ -46,7 +44,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
     constructor(store: W) {
         super();
         this.store = store;
-        this.dataSource = new DataSource<InstanceType<W['modelConstructor']>['baseData']>(async (page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => {
+        this.dataSource = new DataSource<BaseDataFromStore<W>>(async (page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => {
             let result = await this.store.list(Manager.buildQuery(page, pageSize));
             return {
                 data: result.data,
@@ -55,7 +53,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
         });
     }
 
-    init(id?: InstanceType<W['modelConstructor']>['$id'], query?: X, defaultItem?: X): Promise<IPage<InstanceType<W['modelConstructor']>['baseData']>> {
+    init(id?: IdFromStore<W>, query?: X, defaultItem?: X): Promise<IPage<BaseDataFromStore<W>>> {
         this.defaultItem = defaultItem;
         //this.active = false;
         var output = this.dataSource.init();
@@ -68,7 +66,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
         return output;
     }
 
-    refresh(): Promise<IPage<InstanceType<W['modelConstructor']>['baseData']>> {
+    refresh(): Promise<IPage<BaseDataFromStore<W>>> {
         return this.dataSource.run(false);
     }
 
@@ -101,7 +99,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
         }
     }
 
-    create(data?: InstanceType<W['modelConstructor']>['baseData']) {
+    create(data?: BaseDataFromStore<W>) {
         this.clearOperation();
         this.loadCount++;
         this.loadingId = undefined;
@@ -114,7 +112,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
         return this.item;
     }
 
-    viewPreload(data?: InstanceType<W['modelConstructor']>['baseData']) {
+    viewPreload(data?: BaseDataFromStore<W>) {
         this.clearOperation();
         this.loadCount++;
         this.loadingId = undefined;
@@ -125,7 +123,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
         return this.item;
     }
 
-    async view(id: InstanceType<W['modelConstructor']>['$id']): Promise<InstanceType<W['modelConstructor']>> {
+    async view(id: IdFromStore<W>): Promise<ModelFromStore<W>> {
         this.clearOperation();
         this.loadCount++;
         var loadCount = this.loadCount;
@@ -148,7 +146,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
         }
     }
 
-    async edit(id: InstanceType<W['modelConstructor']>['$id']): Promise<InstanceType<W['modelConstructor']>> {
+    async edit(id: IdFromStore<W>): Promise<ModelFromStore<W>> {
         this.clearOperation();
         this.loadCount++;
         var loadCount = this.loadCount;
@@ -171,7 +169,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
         }
     }
 
-    delete(id: InstanceType<W['modelConstructor']>['$id']) {
+    delete(id: IdFromStore<W>) {
         // We can delete from Get or Edit, so we do not clear operation here.
         this.operation = Operation.Delete;
         this.idToDelete = id;
@@ -204,7 +202,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Ins
         this.sendEvent('cancel');
     }
 
-    async confirm(saveAndContinue: boolean = false): Promise<InstanceType<W['modelConstructor']>['$id'] | boolean> {
+    async confirm(saveAndContinue: boolean = false): Promise<IdFromStore<W> | boolean> {
         switch (this.operation) {
             case Operation.Create:
                 let createData = await this.item.save();
