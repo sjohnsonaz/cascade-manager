@@ -3,7 +3,7 @@ export { ICrudConnection } from './interfaces/ICrudConnection';
 export { IData } from './interfaces/IData';
 export { IListQuery, IQuery, IQueryPartial } from './interfaces/IListQuery';
 export { IListResult } from './interfaces/IListResult';
-export { IManager } from './interfaces/IManager';
+export { IManager, Operation } from './interfaces/IManager';
 export { IModel } from './interfaces/IModel';
 export { IQueryModel } from './interfaces/IQueryModel';
 export { ISelectable } from './interfaces/ISelectable';
