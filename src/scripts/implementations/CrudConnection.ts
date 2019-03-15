@@ -5,7 +5,11 @@ import { ICrudConnection } from '../interfaces/ICrudConnection';
 
 import Connection from './Connection';
 
-export default class CrudConnection<T, U extends IData<T>, V extends IQuery<U> = IQuery<U>> extends Connection implements ICrudConnection<T, U, V> {
+export default class CrudConnection<
+    T,
+    U extends IData<T>,
+    V extends IQuery<U> = IQuery<U>
+    > extends Connection implements ICrudConnection<T, U, V> {
     list(query: V): Promise<IListResult<U>> {
         return this.call<IListResult<U>>(this.base + Connection.objectToQueryString(query || {}), {});
     }
