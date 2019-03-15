@@ -8,18 +8,18 @@ import { IManager, Operation, ModelFromStore, IdFromStore, BaseDataFromStore } f
 import { State } from './State';
 
 export default class Manager<
-    W extends IStore<any, any, X>,
-    X extends IQuery<ModelFromStore<W>> = IQuery<ModelFromStore<W>>
-    > extends State implements IManager<W, X> {
-    store: W;
-    @observable item: ModelFromStore<W>;
-    @observable idToDelete: IdFromStore<W>;
+    T extends IStore<any, any, U>,
+    U extends IQuery<ModelFromStore<T>> = IQuery<ModelFromStore<T>>
+    > extends State implements IManager<T, U> {
+    store: T;
+    @observable item: ModelFromStore<T>;
+    @observable idToDelete: IdFromStore<T>;
     @observable operation: Operation = Operation.Get;
-    dataSource: IDataSource<BaseDataFromStore<W>>;
-    defaultItem: X;
+    dataSource: IDataSource<BaseDataFromStore<T>>;
+    defaultItem: BaseDataFromStore<T>;
     initialized: boolean = false;
     loadCount: number = 0;
-    @observable loadingId: IdFromStore<W>;
+    @observable loadingId: IdFromStore<T>;
 
     // TODO: Fix this.
     /*
@@ -44,10 +44,10 @@ export default class Manager<
         return this._slideIndex;
     }
 
-    constructor(store: W) {
+    constructor(store: T) {
         super();
         this.store = store;
-        this.dataSource = new DataSource<BaseDataFromStore<W>>(async (page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => {
+        this.dataSource = new DataSource<BaseDataFromStore<T>>(async (page: number, pageSize: number, sortedColumn: string, sortedDirection: boolean) => {
             let result = await this.store.list(Manager.buildQuery(page, pageSize));
             return {
                 data: result.data,
@@ -56,7 +56,7 @@ export default class Manager<
         });
     }
 
-    init(id?: IdFromStore<W>, query?: X, defaultItem?: X): Promise<IPage<BaseDataFromStore<W>>> {
+    init(id?: IdFromStore<T>, query?: U, defaultItem?: BaseDataFromStore<T>): Promise<IPage<BaseDataFromStore<T>>> {
         this.defaultItem = defaultItem;
         //this.active = false;
         var output = this.dataSource.init();
@@ -69,7 +69,7 @@ export default class Manager<
         return output;
     }
 
-    refresh(): Promise<IPage<BaseDataFromStore<W>>> {
+    refresh(): Promise<IPage<BaseDataFromStore<T>>> {
         return this.dataSource.run(false);
     }
 
@@ -102,7 +102,7 @@ export default class Manager<
         }
     }
 
-    create(data?: BaseDataFromStore<W>) {
+    create(data?: BaseDataFromStore<T>): ModelFromStore<T> {
         this.clearOperation();
         this.loadCount++;
         this.loadingId = undefined;
@@ -114,19 +114,23 @@ export default class Manager<
         return this.item;
     }
 
-    viewPreload(data?: BaseDataFromStore<W>) {
+    viewPreload(data?: BaseDataFromStore<T>): ModelFromStore<T> {
         this.clearOperation();
         this.loadCount++;
         this.loadingId = undefined;
-        let item = this.store.create(data || this.defaultItem);
-        if (item.$id)
-            this.operation = Operation.Get;
+        let item: ModelFromStore<T> = this.store.create(data || this.defaultItem);
         this.item = item;
-        this.sendEvent('viewPreload', this.item);
+        if (item.$id) {
+            this.operation = Operation.Get;
+            this.sendEvent('view', this.item);
+        } else {
+            this.operation = Operation.Create;
+            this.sendEvent('create', this.item);
+        }
         return this.item;
     }
 
-    async view(id: IdFromStore<W>): Promise<ModelFromStore<W>> {
+    async view(id: IdFromStore<T>): Promise<ModelFromStore<T>> {
         this.clearOperation();
         this.loadCount++;
         var loadCount = this.loadCount;
@@ -136,6 +140,7 @@ export default class Manager<
             if (loadCount === this.loadCount) {
                 this.loadingId = undefined;
                 this.item = item;
+                this.operation = Operation.Get;
                 // TODO: should this be set?
                 // this.operation = Operation.Edit;
             }
@@ -149,7 +154,7 @@ export default class Manager<
         }
     }
 
-    async edit(id: IdFromStore<W>): Promise<ModelFromStore<W>> {
+    async edit(id: IdFromStore<T>): Promise<ModelFromStore<T>> {
         this.clearOperation();
         this.loadCount++;
         var loadCount = this.loadCount;
@@ -172,7 +177,7 @@ export default class Manager<
         }
     }
 
-    delete(id: IdFromStore<W>) {
+    delete(id: IdFromStore<T>) {
         // We can delete from Get or Edit, so we do not clear operation here.
         this.operation = Operation.Delete;
         this.idToDelete = id;
@@ -181,6 +186,9 @@ export default class Manager<
     cancel() {
         this.loadCount++;
         switch (this.operation) {
+            case Operation.Get:
+                this.item = undefined;
+                break;
             case Operation.Create:
                 // TODO: Remove revert?
                 //this.item.revert();
@@ -205,7 +213,7 @@ export default class Manager<
         this.sendEvent('cancel');
     }
 
-    async confirm(saveAndContinue: boolean = false): Promise<IdFromStore<W> | boolean> {
+    async confirm(saveAndContinue: boolean = false): Promise<IdFromStore<T> | boolean> {
         switch (this.operation) {
             case Operation.Create:
                 let createData = await this.item.save();
