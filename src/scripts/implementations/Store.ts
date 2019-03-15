@@ -8,9 +8,14 @@ import { IQueryModel } from '../interfaces/IQueryModel';
 import { IData, IDataNumberDictionary, IDataStringDictionary } from '../interfaces/IData';
 import { IStore } from '../interfaces/IStore';
 
-export default class Store<U extends ICrudConnection<W['$id'], any, X>, W extends IModel<any, any, U>, X extends IQuery<W['baseData']> = IQuery<W['baseData']>> implements IStore<U, W, X> {
-    connection: U;
-    modelConstructor: new (data?: W['baseData'], connection?: U) => W;
+export default class Store<
+    T extends ICrudConnection<U['$id'], any, V>,
+    U extends IModel<any, any, T>,
+    V extends IQuery<W> = IQuery<U['baseData']>,
+    W extends IData<any> = IData<any>
+    > implements IStore<T, U, V> {
+    connection: T;
+    modelConstructor: new (data?: W, connection?: T) => U;
     @observable listLoading: boolean = false;
     @observable listLoaded: boolean = false;
     @observable getLoading: boolean = false;
@@ -18,12 +23,12 @@ export default class Store<U extends ICrudConnection<W['$id'], any, X>, W extend
     @observable deleteLoading: boolean = false;
     @observable deleteLoaded: boolean = false;
 
-    constructor(connection: U, modelConstructor?: new (data?: W['baseData'], connection?: U) => W) {
+    constructor(connection: T, modelConstructor?: new (data?: W, connection?: T) => U) {
         this.connection = connection;
         this.modelConstructor = modelConstructor;
     }
 
-    async list(query?: X) {
+    async list(query?: V) {
         this.listLoading = true;
         this.listLoaded = false;
         try {
@@ -36,7 +41,7 @@ export default class Store<U extends ICrudConnection<W['$id'], any, X>, W extend
         }
     }
 
-    async get(id: W['$id']) {
+    async get(id: U['$id']) {
         this.getLoading = true;
         this.getLoaded = false;
         try {
@@ -49,12 +54,12 @@ export default class Store<U extends ICrudConnection<W['$id'], any, X>, W extend
         }
     }
 
-    create(data?: W['baseData']) {
+    create(data?: W) {
         return new this.modelConstructor(data, this.connection);
     }
 
-    createArray(data?: W['baseData'][]) {
-        var output: W[] = [];
+    createArray(data?: W[]) {
+        var output: U[] = [];
         for (var index = 0, length = data.length; index < length; index++) {
             output.push(this.create(data[index]));
         }
@@ -62,7 +67,7 @@ export default class Store<U extends ICrudConnection<W['$id'], any, X>, W extend
     }
 
     // TODO: Add bulk delete
-    async delete(id: W['$id']) {
+    async delete(id: U['$id']) {
         this.deleteLoading = true;
         this.deleteLoaded = false;
         try {
@@ -75,7 +80,7 @@ export default class Store<U extends ICrudConnection<W['$id'], any, X>, W extend
         }
     }
 
-    listToPage(listData: any): IPage<W['baseData']> {
+    listToPage(listData: any): IPage<W> {
         return listData;
     }
 

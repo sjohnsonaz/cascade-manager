@@ -5,12 +5,19 @@ import { ICrudConnection } from '../interfaces/ICrudConnection';
 import { IModel, ModelNumberIndex, ModelStringIndex } from '../interfaces/IModel';
 import QueryModel from './QueryModel';
 
-export default class Model<T, U extends IData<T>, V extends ICrudConnection<T, U, any>> extends QueryModel<U> implements IModel<T, U, V> {
+export default class Model<
+    T,
+    U extends IData<T>,
+    V extends ICrudConnection<T, U, any>
+    >
+    extends QueryModel<U>
+    implements IModel<T, U, V>
+{
     primaryKey: string = 'id';
     connection: V;
     @observable saving: boolean;
     @observable deleting: boolean;
-    @observable selected;
+    @observable selected: boolean;
     @observable get $id(): T {
         return this[this.primaryKey];
     }

@@ -16,7 +16,10 @@ export type ModelFromStore<W extends IStore<any, any, any>> = InstanceType<W['mo
 export type IdFromStore<W extends IStore<any, any, any>> = ModelFromStore<W>['$id'];
 export type BaseDataFromStore<W extends IStore<any, any, any>> = ModelFromStore<W>['baseData'];
 
-export interface IManager<W extends IStore<any, any, X>, X extends IQuery<ModelFromStore<W>> = IQuery<InstanceType<W['modelConstructor']>>> extends IState {
+export interface IManager<
+    W extends IStore<any, any, X>,
+    X extends IQuery<ModelFromStore<W>> = IQuery<ModelFromStore<W>>
+    > extends IState {
     item: ModelFromStore<W>;
     idToDelete: IdFromStore<W>;
     operation: Operation;

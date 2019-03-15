@@ -1,12 +1,20 @@
-import {IData} from './IData';
-import {IQueryModel} from './IQueryModel';
-import {ISelectable} from './ISelectable';
-import {ICrudConnection} from './ICrudConnection';
+import { IData } from './IData';
+import { IQueryModel } from './IQueryModel';
+import { ISelectable } from './ISelectable';
+import { ICrudConnection } from './ICrudConnection';
 
-export interface IModel<T, U extends IData<T>, V extends ICrudConnection<T, U, any>> extends IData<T>, IQueryModel<U>, ISelectable {
-    $id: T;
-
+export interface IModel<
+    T,
+    U extends IData<T>,
+    V extends ICrudConnection<T, U, any>
+    >
+    extends IData<T>, IQueryModel<U>, ISelectable {
     primaryKey: string;
+    $id: T;
+    connection: V;
+    saving: boolean;
+    deleting: boolean;
+    selected: boolean;
 
     save(): Promise<T | boolean>;
     delete(): Promise<boolean>;

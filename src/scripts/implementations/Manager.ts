@@ -7,7 +7,10 @@ import { IManager, Operation, ModelFromStore, IdFromStore, BaseDataFromStore } f
 
 import { State } from './State';
 
-export default class Manager<W extends IStore<any, any, X>, X extends IQuery<ModelFromStore<W>> = IQuery<ModelFromStore<W>>> extends State implements IManager<W, X> {
+export default class Manager<
+    W extends IStore<any, any, X>,
+    X extends IQuery<ModelFromStore<W>> = IQuery<ModelFromStore<W>>
+    > extends State implements IManager<W, X> {
     store: W;
     @observable item: ModelFromStore<W>;
     @observable idToDelete: IdFromStore<W>;
@@ -104,8 +107,7 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Mod
         this.loadCount++;
         this.loadingId = undefined;
         this.operation = Operation.Create;
-        // TODO: Clean this any.
-        let item = this.store.create(data || this.defaultItem as any);
+        let item = this.store.create(data || this.defaultItem);
         this.item = item;
         this.sendEvent('create', item);
 
@@ -116,8 +118,9 @@ export default class Manager<W extends IStore<any, any, X>, X extends IQuery<Mod
         this.clearOperation();
         this.loadCount++;
         this.loadingId = undefined;
-        // TODO: Clean this any.
-        let item = this.store.create(data || this.defaultItem as any);
+        let item = this.store.create(data || this.defaultItem);
+        if (item.$id)
+            this.operation = Operation.Get;
         this.item = item;
         this.sendEvent('viewPreload', this.item);
         return this.item;

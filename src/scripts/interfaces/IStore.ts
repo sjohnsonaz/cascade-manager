@@ -3,10 +3,16 @@
 import { ICrudConnection } from './ICrudConnection';
 import { IQuery } from './IListQuery';
 import { IModel } from './IModel';
+import { IData } from './IData';
 
-export interface IStore<U extends ICrudConnection<W['$id'], any, X>, W extends IModel<any, any, U>, X extends IQuery<W['baseData']> = IQuery<W['baseData']>> {
-    connection: U;
-    modelConstructor: new (data?: W['baseData'], connection?: U) => W;
+export interface IStore<
+    T extends ICrudConnection<U['$id'], W, V>,
+    U extends IModel<any, W, T>,
+    V extends IQuery<W> = IQuery<U['baseData']>,
+    W extends IData<any> = IData<any>
+    > {
+    connection: T;
+    modelConstructor: new (data?: W, connection?: T) => U;
     listLoading: boolean;
     listLoaded: boolean;
     getLoading: boolean;
@@ -14,10 +20,10 @@ export interface IStore<U extends ICrudConnection<W['$id'], any, X>, W extends I
     deleteLoading: boolean;
     deleteLoaded: boolean;
 
-    list(query?: X): Promise<IPage<W['baseData']>>;
-    get(id: W['$id']): Promise<W>;
-    create(data?: W['baseData']): W
-    createArray(data?: W['baseData'][]): W[];
-    delete(id: W['$id']): Promise<boolean>;
-    listToPage(listData: any): IPage<W['baseData']>;
+    list(query?: V): Promise<IPage<W>>;
+    get(id: U['$id']): Promise<U>;
+    create(data?: W): U
+    createArray(data?: W[]): U[];
+    delete(id: U['$id']): Promise<boolean>;
+    listToPage(listData: any): IPage<W>;
 }
