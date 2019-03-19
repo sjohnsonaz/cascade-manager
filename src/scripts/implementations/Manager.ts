@@ -1,4 +1,4 @@
-import { observable } from 'cascade';
+import Cascade, { observable } from 'cascade';
 import DataSource, { IDataSource, IPage } from 'cascade-datasource';
 
 import { IStore } from '../interfaces/IStore';
@@ -14,7 +14,7 @@ export default class Manager<
     store: T;
     @observable item: ModelFromStore<T>;
     @observable idToDelete: IdFromStore<T>;
-    @observable operation: Operation = Operation.Get;
+    @observable operation: Operation = Operation.List;
     dataSource: IDataSource<BaseDataFromStore<T>>;
     defaultItem: BaseDataFromStore<T>;
     initialized: boolean = false;
@@ -35,14 +35,6 @@ export default class Manager<
         return selected;
     }
     */
-
-    private _slideIndex: number = Operation.Get;
-    @observable get slideIndex() {
-        if (this.operation !== Operation.Delete) {
-            this._slideIndex = this.operation;
-        }
-        return this._slideIndex;
-    }
 
     constructor(store: T) {
         super();
@@ -183,28 +175,33 @@ export default class Manager<
         this.idToDelete = id;
     }
 
-    cancel() {
+    async cancel() {
         this.loadCount++;
         switch (this.operation) {
             case Operation.Get:
+                this.operation = Operation.List;
+                await Cascade.track(this, 'operation');
                 this.item = undefined;
                 break;
             case Operation.Create:
                 // TODO: Remove revert?
                 //this.item.revert();
-                this.operation = Operation.Get;
+                this.operation = Operation.List;
+                await Cascade.track(this, 'operation');
                 this.item = undefined;
                 break;
             case Operation.Edit:
                 // TODO: Remove revert?
                 //this.item.revert();
                 this.operation = Operation.Get;
+                await Cascade.track(this, 'operation');
                 this.item = undefined;
                 break;
             case Operation.Delete:
                 if (this.slideIndex === 0) {
                     this.idToDelete = undefined;
                 }
+                await Cascade.track(this, 'operation');
                 this.operation = this.slideIndex;
                 break;
             default:

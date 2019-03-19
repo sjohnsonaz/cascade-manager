@@ -31,7 +31,6 @@ export interface IManager<
 
     // TODO: Fix this
     //selectedItems: U[];
-    slideIndex: number;
 
     init(id?: IdFromStore<T>, query?: U, defaultItem?: BaseDataFromStore<T>): Promise<IPage<BaseDataFromStore<T>>>;
     refresh(): Promise<IPage<BaseDataFromStore<T>>>;
