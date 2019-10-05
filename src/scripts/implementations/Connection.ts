@@ -16,7 +16,7 @@ export default class Connection implements IConnection {
         let response = await fetch(url, init);
         let result = noParse ?
             await response.text() :
-            response.json();
+            await response.json();
         if (response.status < 200 || response.status >= 300) {
             throw result;
         }
