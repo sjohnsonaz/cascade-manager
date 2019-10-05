@@ -20,19 +20,22 @@ export interface IManager<
     T extends IStore<any, any, U>,
     U extends IQuery<ModelFromStore<T>> = IQuery<ModelFromStore<T>>
     > extends IState {
+
+    store: T;
+    dataSource: IDataSource<BaseDataFromStore<T>>;
+
     item: ModelFromStore<T>;
     idToDelete: IdFromStore<T>;
     operation: Operation;
-    store: T;
-    dataSource: IDataSource<BaseDataFromStore<T>>;
     defaultItem: BaseDataFromStore<T>;
-    loadCount: number;
+
+    initialized: boolean;
     loadingId: IdFromStore<T>;
 
     // TODO: Fix this
     //selectedItems: U[];
 
-    init(id?: IdFromStore<T>, query?: U, defaultItem?: BaseDataFromStore<T>): Promise<IPage<BaseDataFromStore<T>>>;
+    init(id?: IdFromStore<T> | BaseDataFromStore<T>, query?: U, defaultItem?: BaseDataFromStore<T>): Promise<IPage<BaseDataFromStore<T>>>;
     refresh(): Promise<IPage<BaseDataFromStore<T>>>;
     clear(): void;
     dispose(): void;
@@ -40,7 +43,7 @@ export interface IManager<
     //clearSelection(): void;
     clearOperation(): void;
     create(data?: BaseDataFromStore<T>): ModelFromStore<T>;
-    viewPreload(data?: BaseDataFromStore<T>): ModelFromStore<T>;
+    preload(data?: BaseDataFromStore<T>, operation?: Operation): ModelFromStore<T>;
     view(id: IdFromStore<T>): Promise<ModelFromStore<T>>;
     edit(id: IdFromStore<T>): Promise<ModelFromStore<T>>;
     delete(id: IdFromStore<T>): void;

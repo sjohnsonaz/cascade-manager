@@ -11,15 +11,19 @@ export default class Manager<
     T extends IStore<any, any, U>,
     U extends IQuery<ModelFromStore<T>> = IQuery<ModelFromStore<T>>
     > extends State implements IManager<T, U> {
+
     store: T;
+    dataSource: IDataSource<BaseDataFromStore<T>>;
+
     @observable item: ModelFromStore<T>;
     @observable idToDelete: IdFromStore<T>;
     @observable operation: Operation = Operation.List;
-    dataSource: IDataSource<BaseDataFromStore<T>>;
     defaultItem: BaseDataFromStore<T>;
+
     initialized: boolean = false;
-    loadCount: number = 0;
     @observable loadingId: IdFromStore<T>;
+
+    private loadCount: number = 0;
 
     // TODO: Fix this.
     /*
@@ -48,15 +52,25 @@ export default class Manager<
         });
     }
 
-    init(id?: IdFromStore<T>, query?: U, defaultItem?: BaseDataFromStore<T>): Promise<IPage<BaseDataFromStore<T>>> {
+    async init(id?: IdFromStore<T> | BaseDataFromStore<T>, query?: U, defaultItem?: BaseDataFromStore<T>): Promise<IPage<BaseDataFromStore<T>>> {
         this.defaultItem = defaultItem;
-        //this.active = false;
-        var output = this.dataSource.init();
-        if (id) {
-            this.edit(id);
-        } else {
-            this.loadingId = undefined;
-            this.clearOperation();
+        // TODO: Can we use Promise.all?
+        let output = await this.dataSource.init();
+        switch (typeof id) {
+            case 'string':
+            case 'number':
+                await this.edit(id);
+                break;
+            case 'object':
+                if (id) {
+                    this.preload(id);
+                    break;
+                }
+            // Do nothing on undefined or null
+            default:
+                this.loadingId = undefined;
+                this.clearOperation();
+                break;
         }
         return output;
     }
@@ -106,7 +120,7 @@ export default class Manager<
         return this.item;
     }
 
-    viewPreload(data?: BaseDataFromStore<T>): ModelFromStore<T> {
+    preload(data?: BaseDataFromStore<T>, operation: Operation = Operation.Get): ModelFromStore<T> {
         this.clearOperation();
         this.loadCount++;
         this.loadingId = undefined;
@@ -198,11 +212,9 @@ export default class Manager<
                 this.item = undefined;
                 break;
             case Operation.Delete:
-                if (this.slideIndex === 0) {
-                    this.idToDelete = undefined;
-                }
+                this.operation = Operation.Get;
+                this.idToDelete = undefined;
                 await Cascade.track(this, 'operation');
-                this.operation = this.slideIndex;
                 break;
             default:
                 break;
