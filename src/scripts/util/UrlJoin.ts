@@ -1,9 +1,11 @@
-export default function urlJoin(...parts: any[]) {
-    var joined = parts.join('/');
+export default function join(...parts: string[]) {
+    let joined = parts.join('/');
     return normalize(joined);
 }
 
 function normalize(str: string) {
+    // replace all back slashes
+    str = str.replace(/\\/g, '/');
 
     // make sure protocol is followed by two slashes
     str = str.replace(/:\//g, '://');
