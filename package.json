@@ -38,7 +38,7 @@
     "chai-as-promised": "7.1.1",
     "isomorphic-fetch": "2.2.1",
     "jsdom": "11.7.0",
-    "mocha": "6.0.2",
+    "mocha": "10.2.0",
     "reflect-metadata": "0.1.13",
     "ts-loader": "5.3.3",
     "typescript": "3.3.3333",
